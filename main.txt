@@ -1,0 +1,192 @@
+//bat, spider
+var done = 0
+var mode = berserk
+func f_start(mode)
+    ?pickup.distance <= 8//something to pick up
+        equip star stone
+    ?foe.count >=4 & mode = farm
+        activate potion
+    ?foe.distance > 17 & foe!spawner & foe ! boss//nothing to pick up, heal if far from ennemies
+        equip Ouroboros Stone
+
+func f_berserk(mode)
+    ?mode = berserk
+        activate potion
+func f_heal(mode)
+    ?mode = heal
+        activate potion
+
+func f_low()
+    ?hp < 15
+        loadout 1
+func f_attack(n)
+    ?foe.state = 32 | foe.state = 33
+        equipR vigor shield
+        equipL vigor wand
+?loc = Boiling Mine
+    f_start(mode)
+    ?foe.distance <= 22
+        equip ether crossbow
+        ?foe = boss
+            ?foe.state = 33
+                ?hp <= 15
+                    equipR sword
+                    equipL vigor sword
+                :?done = 0 
+                    equip quarterstaff
+                    activate R
+                    done = 1
+                :?done = 1
+                    equipR sword
+                    equipL ether sword
+            :
+                equip ether crossbow
+                done = 0
+    :
+        f_start(no)
+?loc = Mushroom Forest
+    var puff = no
+    f_start(mode)
+    ?hp<=10
+        f_heal(mode)
+    ?foe.distance <= 22
+        ?foe.count >3 | foe = ant
+            equipL poison wand +0
+            equipR vigor wand
+        :?foe ! boss
+            equip poison crossbow
+
+        :?foe = boss
+            equip poison crossbow
+            ?foe = phase1
+                ?foe.distance > 7
+                    equip poison crossbow
+                :
+                    equipL poison sword
+                    equipR vigor sword
+            :?foe = phase2
+                equipR poison sword
+                equipL vigor sword
+                f_berserk(mode)
+
+            :
+                ?foe = "fluff" & foe.distance <= 4
+                    equip mind stone
+
+
+?loc = Caves of Fear
+    f_start(yes)
+    ?foe.distance <=22
+        ?foe ! boss
+            equipL vigor wand
+            equipR poison wand +1
+        :
+            equip poison crossbow
+    
+?loc = Haunted Halls
+    var x = 0 // equals 1 while tombstone still up ahead
+    var oldki
+
+    ?foe = spawner & foe.z = pos.z //tomb ahead and alined to us
+        oldki = res.ki
+        x = 1
+
+    f_start(mode)
+    ?foe.distance <22
+        ?x=1
+            equip fire bow
+            ?oldki!res.ki
+                x = 0
+        :
+            //boss
+            ?foe = phase1
+                equipR sword
+                equipL vigor sword
+
+            :?foe = phase2
+
+                //activate potion
+                f_berserk(mode)
+
+                ? foe.count = 1
+                    equipR vigor wand 
+                    equipL vigor wand *9
+
+            //other mobs
+            :
+                equipR vigor wand
+                equipL vigor wand *9
+    ?hp<=8
+        f_heal(mode)
+?loc = Deadwood Canyon
+    f_start(yes)
+
+    ?foe.distance <=22
+        ?foe = mosquito
+            equipR vigor wand *9
+            equipL vigor wand
+        :?foe = stone scarab
+            equip bardiche +11
+            ?foe.distance <= 9
+                activate R
+
+        :? foe = boss
+
+            ?done = 0
+                equip quarterstaff
+                activate R
+            :?done = 1
+                equipL vigor sword
+                equipR sword
+                //? foe = phase2 
+                //    done = 0
+        done = 1
+
+?loc = Rocky Plateau
+    var equipment = 1
+    f_start(mode)
+    ?hp <= 10
+        f_heal(mode)
+    ?foe.distance <=22
+        ?foe = phase1
+            equipR ice sword
+            equipL vigor sword
+
+        :?foe = phase2
+            f_berserk(mode)
+            equipR sword
+
+            ?foe.state = 33 | foe.state = 32
+                ?foe = fire
+                    equipR vigor sword
+                    equipL ether sword
+                :?foe = ether
+                    equipL vigor sword
+                :?foe = vigor
+                    equipL poison sword
+                :?foe = poison
+                    equipR vigor sword
+                    equipL ice sword
+                :?foe = ice
+                    equipR vigor sword
+                    equipL fire sword
+            ?foe.state = 115 & foe.time = 46
+                equip Mind Stone
+
+        :?foe = phase3
+            /*?equipment = 9
+                equipment= 0
+            loadout @equipment@*/
+            equipR vigor sword
+            equipL ice sword
+            ?foe.state = 115 
+                ?foe.time >=65
+                    equip Mind Stone
+            /*:? foe.state = 33 & foe.time <= 5
+                equipment = equipment + 1*/
+        :
+            equipR sword
+            equipL vigor sword
+
+    
+    
